@@ -3,8 +3,10 @@ import cv2
 from skimage import feature
 
 
-# def flip_frame(frame_to_flip):
-#     return cv2.flip(frame_to_flip, 1)
+def flip_frame(frame_to_flip):
+    return cv2.flip(frame_to_flip, 1)
+
+
 #
 # capture = cv2.VideoCapture(0)
 # numPoints = 24
@@ -29,6 +31,11 @@ import imutils
 import time
 import dlib
 
+
+def get_distance(a, b):
+    return np.linalg.norm(np.array(a) - np.array(b))
+
+
 # initialize dlib's face detector (HOG-based) and then create
 # the facial landmark predictor
 print("loading facial landmark predictor...")
@@ -39,7 +46,27 @@ predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 print("camera sensor warming up...")
 vs = VideoStream().start()
 # time.sleep(2.0)
+pointsConsider = [38, 39, 41, 42, 44, 48, 45, 47, 20, 40, 21, 22, 19, 23, 43, 24, 25, 26, 49, 55, 52, 58, 34, 50, 54]
+leftEye = [(38, 42), (39, 41)]
+rightEye = [(44, 48), (45, 47)]
+leftEyebrow = [(20, 40), (21, 40), (22, 40), (19, 40)]
+rightEyebrow = [(23, 43), (24, 43), (25, 43), (26, 43)]
+mouthWidth = [(49, 55)]
+mouthHeight = [(52, 58)]
+angleWithNoseLeft = [(34, 49), (34, 55)]
+angleWithNoseRight = [(34, 50), (34, 54)]
+verticalWithNose = [(34, 52)]
+pairs = leftEye + rightEye + leftEyebrow + rightEyebrow + mouthWidth + mouthHeight + angleWithNoseLeft + \
+        angleWithNoseRight + verticalWithNose
 
+eyeDistance = 0
+eyebrowDistanceLeft = 0
+eyebrowDistanceRight = 0
+mouthWidthDistance = 0
+mouthHeightDistance = 0
+angleWithNoseLeftDistance = 0
+angleWithNoseRightDistance = 0
+distances = {}
 while True:
     # grab the frame from the threaded video stream, resize it to
     # have a maximum width of 400 pixels, and convert it to
@@ -47,25 +74,72 @@ while True:
     frame = vs.read()
     frame = imutils.resize(frame)
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
+    landmarks = {}
     # detect faces in the grayscale frame
     rects = detector(gray, 0)
     # loop over the face detections
     for rect in rects:
-        print("new detect")
+        # print("new detect")
         # determine the facial landmarks for the face region, then
         # convert the facial landmark (x, y)-coordinates to a NumPy
         # array
-        print(rect)
         shape = predictor(gray, rect)
         shape = face_utils.shape_to_np(shape)
-        print(shape.size == 136)
         # loop over the (x, y)-coordinates for the facial landmarks
         # and draw them on the image
+        c = 0
         for (x, y) in shape:
+            c += 1
             # print('landmarks:', shape)
-            cv2.circle(frame, (x, y), 1, (0, 0, 255), -1)
+            # cv2.circle(frame, (x, y), 1, (0, 0, 255), -1)
+            if c in pointsConsider:
+                landmarks[c] = (x, y)
+            cv2.putText(frame, str(c), (x, y), cv2.FONT_HERSHEY_SIMPLEX, 0.25, (0, 0, 255), 1, cv2.LINE_AA)
 
+    currentEyebrowLeft = 0
+    currentEyebrowRight = 0
+    currentAngleWithNoseLeft = 0
+    currentAngleWithNoseRight = 0
+    for pair in pairs:
+        p1 = pair[0]
+        p2 = pair[1]
+        try:
+            l1 = landmarks[p1]
+            l2 = landmarks[p2]
+            distance = get_distance(l1, l2)
+            lipNormalDistance = get_distance(landmarks[34], landmarks[52])
+            eyeNormDistanceLeft = get_distance(landmarks[40], landmarks[22])
+            eyeNormDistanceRight = get_distance(landmarks[43], landmarks[23])
+
+            if pair in leftEyebrow:
+                currentEyebrowLeft += distance / eyeNormDistanceLeft
+            elif pair in rightEyebrow:
+                currentEyebrowRight += distance / eyeNormDistanceRight
+            elif pair in mouthWidth:
+                distances['mouthWidthDistance'] = distance/lipNormalDistance - mouthWidthDistance
+                mouthWidthDistance = distance/lipNormalDistance
+            elif pair in mouthHeight:
+                distances['mouthHeightDistance'] = distance/lipNormalDistance - mouthHeightDistance
+                mouthHeightDistance = distance/lipNormalDistance
+            elif pair in angleWithNoseLeft:
+                currentAngleWithNoseLeft += distance/lipNormalDistance
+            elif pair in angleWithNoseRight:
+                currentAngleWithNoseRight += distance/lipNormalDistance
+            cv2.line(frame, l1, l2, (0, 255, 0), 1, cv2.LINE_AA)
+        except KeyError:
+            print('not found pairs1', p1)
+            print('not found pairs2', p2)
+
+    distances['eyebrowDistanceLeft'] = currentEyebrowLeft - eyebrowDistanceLeft
+    distances['eyebrowDistanceRight'] = currentEyebrowRight - eyebrowDistanceRight
+    distances['angleWithNoseLeftDistance'] = currentAngleWithNoseLeft - angleWithNoseLeftDistance
+    distances['angleWithNoseRightDistance'] = currentAngleWithNoseRight - angleWithNoseRightDistance
+    eyebrowDistanceLeft = currentEyebrowLeft
+    eyebrowDistanceRight = currentEyebrowRight
+    angleWithNoseLeftDistance = currentAngleWithNoseLeft
+    angleWithNoseRightDistance = currentAngleWithNoseRight
+
+    print('Distances:', distances['eyebrowDistanceLeft'])
     # show the frame
     cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
@@ -76,4 +150,3 @@ while True:
 
 cv2.destroyAllWindows()
 vs.stop()
-
