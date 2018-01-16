@@ -99,4 +99,8 @@ def classify(path, path_normal):
 
 
 # train()
-classify('data/1_anger/s5/1.png', 'data/1_anger/s5/n.png')
+# classify('data/1_anger/s5/1.png', 'data/1_anger/s5/n.png')
+# classify('data/test/surprise/s34/4.png', 'data/test/surprise/s34/n.png')
+# classify('data/test/happy/s50/3.png', 'data/test/happy/s50/n.png')
+classify('data/test/anger/s37/4.png', 'data/test/anger/s37/n.png') #incorrect
+# classify('data/5_happy/s10/S010_006_00000010.png', 'data/5_happy/s10/n.png')
