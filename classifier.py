@@ -7,6 +7,10 @@ import glob
 from main import calculate_features
 
 path_neural_net = 'data/emotions_net.pkl'
+ANGER = 'anger'
+HAPPY = 'happy'
+SADNESS = 'sadness'
+SURPRISE = 'surprise'
 
 
 def persist_neural_net(net, path):
@@ -17,46 +21,54 @@ def load_neural_net(path):
     return joblib.load(path)
 
 
+def calculate_folder(neutral, folder, label):
+    x = []
+    y = []
+    normal = calculate_features(neutral)
+    for path in glob.glob(folder):
+        if not ('n.png' in path):
+            v = calculate_features(path)
+            x.append(np.subtract(v, normal))
+            y.append(label)
+    return {'x': x, 'y': y}
+
+
 def load_images():
     x = []
     y = []
     print("Start loading images...")
 
-    anger_normal = calculate_features('data/1_anger/s5/n.png', 'output/anger/n.png')
-    c = 0
-    for path in glob.glob("data/1_anger/s5/*.png"):
-        if not ('n.png' in path):
-            c += 1
-            v = calculate_features(path, 'data/output/anger/' + str(c) + '.png')
-            x.append(np.subtract(v, anger_normal))
-            y.append('anger')
+    out = calculate_folder('data/1_anger/s5/n.png', 'data/1_anger/s5/*.png', ANGER)
+    x.extend(out['x'])
+    y.extend(out['y'])
 
-    happy_normal = calculate_features('data/5_happy/s10/n.png', 'output/happy/n.png')
-    c = 0
-    for path in glob.glob("data/5_happy/s10/*.png"):
-        if not ('n.png' in path):
-            c += 1
-            v = calculate_features(path, 'data/output/happy/' + str(c) + '.png')
-            x.append(np.subtract(v, happy_normal))
-            y.append('happy')
+    out = calculate_folder('data/1_anger/s10/n.png', 'data/1_anger/s10/*.png', ANGER)
+    x.extend(out['x'])
+    y.extend(out['y'])
 
-    sadness_normal = calculate_features('data/6_sadness/s14/n.png', 'output/sadness/n.png')
-    c = 0
-    for path in glob.glob("data/6_sadness/s14/*.png"):
-        if not ('n.png' in path):
-            c += 1
-            v = calculate_features(path, 'data/output/sadness/' + str(c) + '.png')
-            x.append(np.subtract(v, sadness_normal))
-            y.append('sadness')
+    out = calculate_folder('data/5_happy/s10/n.png', 'data/5_happy/s10/*.png', HAPPY)
+    x.extend(out['x'])
+    y.extend(out['y'])
 
-    surprise_normal = calculate_features('data/7_surprise/s10/n.png', 'output/surprise/n.png')
-    c = 0
-    for path in glob.glob("data/7_surprise/s10/*.png"):
-        if not ('n.png' in path):
-            c += 1
-            v = calculate_features(path, 'data/output/surprise/' + str(c) + '.png')
-            x.append(np.subtract(v, surprise_normal))
-            y.append('surprise')
+    out = calculate_folder('data/5_happy/s26/n.png', 'data/5_happy/s26/*.png', HAPPY)
+    x.extend(out['x'])
+    y.extend(out['y'])
+
+    out = calculate_folder('data/6_sadness/s14/n.png', 'data/6_sadness/s14/*.png', SADNESS)
+    x.extend(out['x'])
+    y.extend(out['y'])
+
+    out = calculate_folder('data/6_sadness/s26/n.png', 'data/6_sadness/s26/*.png', SADNESS)
+    x.extend(out['x'])
+    y.extend(out['y'])
+
+    out = calculate_folder('data/7_surprise/s10/n.png', 'data/7_surprise/s10/*.png', SURPRISE)
+    x.extend(out['x'])
+    y.extend(out['y'])
+
+    out = calculate_folder('data/7_surprise/s22/n.png', 'data/7_surprise/s22/*.png', SURPRISE)
+    x.extend(out['x'])
+    y.extend(out['y'])
 
     data = {"x": x, "y": y}
     print("Loading images finished", data)
@@ -102,5 +114,5 @@ def classify(path, path_normal):
 # classify('data/1_anger/s5/1.png', 'data/1_anger/s5/n.png')
 # classify('data/test/surprise/s34/4.png', 'data/test/surprise/s34/n.png')
 # classify('data/test/happy/s50/3.png', 'data/test/happy/s50/n.png')
-classify('data/test/anger/s37/4.png', 'data/test/anger/s37/n.png') #incorrect
+# classify('data/test/anger/s37/4.png', 'data/test/anger/s37/n.png') #incorrect
 # classify('data/5_happy/s10/S010_006_00000010.png', 'data/5_happy/s10/n.png')

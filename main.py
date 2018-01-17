@@ -43,7 +43,6 @@ detector = dlib.get_frontal_face_detector()
 # Download model from: http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
 predictor = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
 
-print("camera sensor warming up...")
 # vs = VideoStream().start()
 # time.sleep(2.0)
 pointsConsider = [38, 39, 41, 42, 44, 48, 45, 47, 20, 40, 21, 22, 19, 23, 43, 24, 25, 26, 49, 55, 52, 58, 34, 50, 54]
@@ -67,6 +66,8 @@ mouthHeightDistance = 0
 angleWithNoseLeftDistance = 0
 angleWithNoseRightDistance = 0
 distances = {}
+
+
 # while True:
 #     # grab the frame from the threaded video stream, resize it to
 #     # have a maximum width of 400 pixels, and convert it to
@@ -152,7 +153,7 @@ distances = {}
 # vs.stop()
 
 
-def calculate_features(path, out_path):
+def calculate_features(path, out_path=''):
     frame = cv2.imread(path, cv2.IMREAD_COLOR)
     # print(frame)
     # frame = imutils.resize(frame)
@@ -200,15 +201,15 @@ def calculate_features(path, out_path):
             elif pair in rightEyebrow:
                 current_eyebrow_right += distance / eye_norm_distance_right
             elif pair in mouthWidth:
-                distances['mouthWidthDistance'] = distance/lip_normal_distance - mouth_width_distance
-                mouth_width_distance = distance/lip_normal_distance
+                distances['mouthWidthDistance'] = distance / lip_normal_distance - mouth_width_distance
+                mouth_width_distance = distance / lip_normal_distance
             elif pair in mouthHeight:
-                distances['mouthHeightDistance'] = distance/lip_normal_distance - mouth_height_distance
-                mouth_height_distance = distance/lip_normal_distance
+                distances['mouthHeightDistance'] = distance / lip_normal_distance - mouth_height_distance
+                mouth_height_distance = distance / lip_normal_distance
             elif pair in angleWithNoseLeft:
-                current_angle_with_nose_left += distance/lip_normal_distance
+                current_angle_with_nose_left += distance / lip_normal_distance
             elif pair in angleWithNoseRight:
-                current_angle_with_nose_right += distance/lip_normal_distance
+                current_angle_with_nose_right += distance / lip_normal_distance
             cv2.line(frame, l1, l2, (0, 255, 0), 1, cv2.LINE_AA)
         except KeyError:
             print('not found pairs1', p1)
@@ -217,8 +218,8 @@ def calculate_features(path, out_path):
     out = np.array([current_eyebrow_left, current_eyebrow_right, current_angle_with_nose_left,
                     current_angle_with_nose_right, mouth_width_distance, mouth_height_distance])
     # print('out:', out)
-    cv2.imwrite(out_path, frame)
+    if len(out_path) > 0:
+        cv2.imwrite(out_path, frame)
     return out
-
 
 # calculate_features('data/1_anger/s5/1.png', 'data/output/1-1.png')

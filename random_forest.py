@@ -46,8 +46,22 @@ def classify(path, path_normal):
 
 
 # train()
-# classify('data/1_anger/s5/1.png', 'data/1_anger/s5/n.png')
-# classify('data/5_happy/s10/S010_006_00000010.png', 'data/5_happy/s10/n.png')
-# classify('data/test/anger/s37/4.png', 'data/test/anger/s37/n.png')
-classify('data/test/happy/s50/3.png', 'data/test/happy/s50/n.png') #incorrect
+# anger
+# classify('data/test/anger/s37/4.png', 'data/test/anger/s37/n.png') #in
+# classify('data/test/anger/s71/4.png', 'data/test/anger/s71/n.png')
+# classify('data/test/anger/s87/4.png', 'data/test/anger/s87/n.png')
+
+# happy
+# classify('data/test/happy/s50/3.png', 'data/test/happy/s50/n.png')
+# classify('data/test/happy/s53/4.png', 'data/test/happy/s53/n.png')
+# classify('data/test/happy/s61/4.png', 'data/test/happy/s61/n.png')
+
+# sadness
+# classify('data/test/sadness/s42/4.png', 'data/test/sadness/s42/n.png')
+# classify('data/test/sadness/s80/4.png', 'data/test/sadness/s80/n.png')
+# classify('data/test/sadness/s81/4.png', 'data/test/sadness/s81/n.png') #in
+
+# surprise
 # classify('data/test/surprise/s34/4.png', 'data/test/surprise/s34/n.png')
+# classify('data/test/surprise/s46/4.png', 'data/test/surprise/s46/n.png')
+# classify('data/test/surprise/s63/4.png', 'data/test/surprise/s63/n.png')
